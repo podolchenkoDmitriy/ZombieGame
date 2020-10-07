@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ac73cb10c6b57f4dadef9d8f2ded5d5, type: 3}
+  m_Name: Level1
+  m_EditorClassIdentifier: 
+  _mainLevel: 0
+  _countOfNormalZombies: 10
+  _timeBetweenSpawn: 3
+  _countOfClownZombies: 0
+  _boundsOfZombies: 10
+  _normalZombiePrefab:
+  - {fileID: 1800984040750516851, guid: 878b4209427fa3c4ba1ca9417e8eeab2, type: 3}
+  - {fileID: 8332950733679607253, guid: ae82d2b14c81a7e4ca553fceb3996d60, type: 3}
+  - {fileID: 5125021308090416358, guid: 1c569b66309175349979f27047645061, type: 3}
+  - {fileID: 8390160392038629415, guid: 1478ddf404137bd44a79e1cf2452dacb, type: 3}
+  - {fileID: 3233926439717804982, guid: 2409639fd309b7a4fbe5f31a178af6f1, type: 3}
+  _clownZombiePrefab: {fileID: 4481884165212649004, guid: d515e6609a08f9845877871d56d54aa2,
+    type: 3}
+  _bossPrefab: {fileID: 6257961468199748741, guid: 96103186cbee06e46b766c27dda9c17d,
+    type: 3}
