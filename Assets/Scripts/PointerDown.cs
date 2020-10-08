@@ -1,20 +1,25 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class PointerDown : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class PointerDown : MonoBehaviour,  IPointerClickHandler, IPointerUpHandler, IPointerDownHandler
 {
 
     public static bool buttonPressed;
 
-    public void OnPointerEnter(PointerEventData eventData)
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
     {
         buttonPressed = true;
+
     }
 
-    public void OnPointerExit(PointerEventData eventData)
+    public void OnPointerUp(PointerEventData eventData)
     {
         buttonPressed = false;
+
     }
-
-
 }

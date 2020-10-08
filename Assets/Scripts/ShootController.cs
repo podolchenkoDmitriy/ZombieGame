@@ -22,8 +22,10 @@ public class ShootController : MonoBehaviour
     public Material lasermat;
     LineRenderer line;
     GameObject part;
+    Animator anim;
     void Start()
     {
+        anim = GetComponentInParent<Animator>();
         part = ParticleHolder.instance._bulletFire.gameObject;
         part = Instantiate(part,_cross.transform.position, _cross.rotation, _cross);
         part.SetActive(false);
@@ -135,8 +137,10 @@ public class ShootController : MonoBehaviour
     private IEnumerator InitBullets()
     {
         AudioManager.instance.PlayReloadSound();
-
+        anim.SetBool("Reload_b", true);
         yield return new WaitForSeconds(_reloadTime);
+        anim.SetBool("Reload_b", false);
+
         _numberOfShootInMagazin = 0;
         if (reload)
         {

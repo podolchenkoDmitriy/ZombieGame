@@ -56,25 +56,22 @@ public class ZombieController : MonoBehaviour
 
         }
     }
-    CameraFollow shake;
     private void Start()
     {
         AudioManager.instance.PlayZombieSound();
 
         StartCoroutine(MoveDestination());
-        if (typeOfZombie == ZombieData.TypeOfZombie.Clown)
-        {
-            shake = Camera.main.GetComponent<CameraFollow>();
-        }
+
     }
 
     // Update is called once per frame
     public static bool eating = false;
     bool eat = false;
+    bool alive = true;
     private IEnumerator MoveDestination()
     {
         anim.SetBool("Walk", true);
-        while (gameObject)
+        while (alive)
         {
             if (gameObject != null)
             {
@@ -84,20 +81,27 @@ public class ZombieController : MonoBehaviour
                 {
                     if (!eating && !eat)
                     {
-                        eat = true;
-                        eating = true;
-                        anim.SetBool("Atack", true);
-                        anim.SetBool("Walk", false);
-                        AudioManager.instance.PlayEatSound();
+                        yield return new WaitForSeconds(1f);
+                        if (Vector3.Distance(transform.position, zombie.destination) < 3f)
+                        {
+                            eat = true;
+                            eating = true;
+                            anim.SetBool("Atack", true);
+                            anim.SetBool("Walk", false);
+                            AudioManager.instance.PlayEatSound();
+                        }
+                        eat = false;
+
                     }
-                   
+
 
                 }
                 else
                 {
+                    eat = false;
+
                     anim.SetBool("Walk", true);
                     anim.SetBool("Atack", false);
-                    eat = false;
                     
                 }
             }
@@ -107,15 +111,17 @@ public class ZombieController : MonoBehaviour
 
     private IEnumerator BlowClown()
     {
+        alive = false;
         zombie.speed *= 2f;
         _attackRange *= 2f;
+        zombie.SetDestination(transform.position);
         GameObject part = ParticleHolder.instance._fireEffect.gameObject;
         Instantiate(part,transform);
         yield return new WaitForSeconds(_timeForBlow);
 
         Vector3 explosionPos = transform.position;
         Collider[] colliders = Physics.OverlapSphere(explosionPos, _attackRange);
-        shake.Shake(0.5f, 1f);
+        Camera.main.GetComponent<CameraFollow>().Shake(0.3f, 1f);
         AudioManager.instance.PlayExplousionSound();
 
         foreach (Collider hit in colliders)

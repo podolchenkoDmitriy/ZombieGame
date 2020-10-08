@@ -15,7 +15,6 @@ MonoBehaviour:
   _mainLevel: 0
   _countOfNormalZombies: 10
   _timeBetweenSpawn: 3
-  _countOfClownZombies: 0
   _boundsOfZombies: 10
   _normalZombiePrefab:
   - {fileID: 1800984040750516851, guid: 878b4209427fa3c4ba1ca9417e8eeab2, type: 3}

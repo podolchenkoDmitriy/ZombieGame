@@ -36,23 +36,32 @@ public class SpawnManager : MonoBehaviour
         bossPrefab = levels[_numberOfCurrentLevel].BossPrefab;
     }
     public static List<GameObject> normalZombies = new List<GameObject>();
-    private int time = 6;
+    private int time = 5;
 
     private IEnumerator CountTimeForStart()
     {
+        UIInstance.instance.countStartText.gameObject.SetActive(true);
         while (time > 0)
         {
-            yield return new WaitForSeconds(1f);
+            UIInstance.instance.countStartText.text = time.ToString();
 
             time--;
+            yield return new WaitForSeconds(1f);
 
-            UIInstance.instance.countStartText.text = time.ToString();
 
         }
         UIInstance.instance.countStartText.gameObject.SetActive(false);
         yield return StartCoroutine(StartSpawnNormalWave());
     }
+    IEnumerator ShowText(string text)
+    {
+        
+        UIInstance.instance.countStartText.gameObject.SetActive(true);
+        UIInstance.instance.countStartText.text = text;
+        yield return new WaitForSeconds(1f);
+        UIInstance.instance.countStartText.gameObject.SetActive(false);
 
+    }
     private IEnumerator StartSpawnNormalWave()
     {
         while (normalZombies.Count != 0)
@@ -60,9 +69,11 @@ public class SpawnManager : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
 
         }
-
         yield return new WaitForFixedUpdate();
+
         SetupLevelData();
+
+        StartCoroutine(ShowText("Wave " + (_numberOfCurrentLevel + 1).ToString()));
 
         int numOfZombiesSpawned = 0;
 
@@ -73,8 +84,7 @@ public class SpawnManager : MonoBehaviour
                 numOfZombiesSpawned++;
 
                 GameObject zomb;
-                int n;
-                n = Random.Range(0, spawnPoints.Length - 1);
+                int n = Random.Range(0, spawnPoints.Length);
 
                 if (Vector3.Distance(spawnPoints[n].position, player.position) < 20f)
                 {
@@ -82,13 +92,16 @@ public class SpawnManager : MonoBehaviour
                     {
                         n--;
                     }
-                    else if (n ==0)
+                    else 
                     {
                         n++;
                     }
+
                 }
 
-                zomb = Instantiate(normalZombiePrefab[n], spawnPoints[n].position, Quaternion.identity);
+                int k = Random.Range(0, normalZombiePrefab.Length - 1);
+
+                zomb = Instantiate(normalZombiePrefab[k], spawnPoints[n].position, Quaternion.identity);
                 normalZombies.Add(zomb);
             }
 
@@ -117,7 +130,9 @@ public class SpawnManager : MonoBehaviour
         }
 
         yield return new WaitForFixedUpdate();
+        StartCoroutine(ShowText("ExtraWave " + (_numberOfCurrentLevel).ToString()));
 
+        
         for (int i = 0; i < spawnPoints.Length - 1; i++)
         {
             int numOfNormalZombies = extraLevels[_numberOfCurrentLevel - 1].CountOfNurmalZombies[i];
@@ -131,6 +146,7 @@ public class SpawnManager : MonoBehaviour
                     zomb = Instantiate(normalZombiePrefab[k], spawnPoints[i].transform.position, Quaternion.identity);
 
                     normalZombies.Add(zomb);
+                    yield return new WaitForSeconds(0.2f);
                 }
 
             }
@@ -158,8 +174,14 @@ public class SpawnManager : MonoBehaviour
         {
             yield return new WaitForSeconds(0.5f);
         }
-        Instantiate(bossPrefab, bossSpawnPoint.transform.position, Quaternion.identity);
+        StartCoroutine(ShowText("BossFight"));
+
+       
+        GameObject boss = Instantiate(bossPrefab, bossSpawnPoint.transform.position, Quaternion.identity);
         Camera.main.GetComponent<CameraFollow>().Shake(0.2f, 0.5f);
+        normalZombies.Add(boss);
+
+        yield return new WaitForSeconds(0.5f);
 
         yield return StartCoroutine(DetectWin());
     }

@@ -10,8 +10,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 pointForAimB;
     public float _maxSpeed = 5f;
 
-    private float _forceToMove;
-    private const float _maxForceToMove = 40f;
+
     // Start is called before the first frame update
     [Header("MoveJoyTransform")]
     private Transform movePlaceHolder;
@@ -33,30 +32,18 @@ public class PlayerController : MonoBehaviour
     }
 
     // Update is called once per frame
-    private void Acceleration(float speed, Vector3 dir)
+    private void Acceleration()
     {
-        anim.SetFloat("Speed_f", speed);
-        Vector3 direction = Vector3.zero;
-        if (CameraSwitch.topView)
-        {
-            direction = new Vector3(dir.x, 0, dir.y);
-        }
-        else
-        {
-             direction = new Vector3(offset.x, 0, offset.y);
-
-        }
-        float moveSpeed = (speed * 2f);
-
-        moveSpeed = Mathf.Clamp(moveSpeed, 0, _maxSpeed);
+        Vector3 dir = new Vector3(offset.x, 0, offset.y);
 
         if (CameraSwitch.topView)
         {
-            transform.Translate(-direction.normalized * Time.fixedDeltaTime * moveSpeed, Space.World);
+            transform.Translate(-dir.normalized * Time.fixedDeltaTime * _maxSpeed, Space.World);
+            //transform.position = Vector3.Lerp(transform.position, transform.position - dir.normalized, Time.fixedDeltaTime * _maxSpeed);
         }
         else
         {
-            transform.Translate(-direction.normalized * Time.fixedDeltaTime * moveSpeed, Space.World);
+            transform.Translate(dir.normalized * Time.fixedDeltaTime * _maxSpeed, Space.Self);
 
         }
 
@@ -71,18 +58,15 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 offsetForAim;
     private Vector2 directionForAim;
-    private float force;
     private Vector2 offset;
     private Vector2 direction;
-
-    private void Update()
+    public float sens = 2f;
+    private void FixedUpdate()
     {
         for (int i = 0; i < Input.touchCount; ++i)
         {
             if (Input.GetTouch(i).phase == TouchPhase.Began)
             {
-                _forceToMove = 0;
-
                 if (Input.GetTouch(i).position.x > Screen.width / 2)
                 {
                     pointForAimA = Input.GetTouch(i).position;
@@ -92,6 +76,7 @@ public class PlayerController : MonoBehaviour
 
                         UIInstance.instance.SetOnOffJoyStickForAim(true);
                     }
+                    anim.SetFloat("Speed_f", 0);
 
                     anim.SetBool("Shoot_b", true);
                     anim.SetInteger("WeaponType_int", 2);
@@ -105,6 +90,7 @@ public class PlayerController : MonoBehaviour
                     SetJoyPosition(movePlaceHolder, moveCircle, pointForMoveA);
 
                     UIInstance.instance.SetOnOffJoyStickForMove(true);
+                    anim.SetFloat("Speed_f", _maxSpeed);
 
 
 
@@ -122,7 +108,7 @@ public class PlayerController : MonoBehaviour
 
 
                     offsetForAim = pointForAimB - pointForAimA;
-                    directionForAim = Vector2.ClampMagnitude(offsetForAim, 20f);
+                    directionForAim = Vector2.ClampMagnitude(offsetForAim, 50f);
                     if (CameraSwitch.topView)
                     {
                         shootCircle.transform.position = (new Vector2(pointForAimA.x + directionForAim.x, pointForAimA.y + directionForAim.y));
@@ -137,7 +123,14 @@ public class PlayerController : MonoBehaviour
                         }
                         else
                         {
-                            transform.eulerAngles = angles + new Vector3(0, (Mathf.Atan2(-offsetForAim.x, -offsetForAim.y) * 360 / Mathf.PI), 0);
+                            if (offsetForAim.magnitude > 20f)
+                            {
+                                float xRot = (transform.eulerAngles.y + Mathf.Atan2(offsetForAim.x, offsetForAim.y) * 180 / Mathf.PI);
+                                transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, new Vector3(0, xRot, 0), 0.01f*offsetForAim.magnitude * Time.fixedDeltaTime);
+
+                            }
+
+
 
                         }
                         angles = Vector3.zero;
@@ -150,40 +143,49 @@ public class PlayerController : MonoBehaviour
                     pointForMoveB = Input.GetTouch(i).position;
 
                     offset = pointForMoveB - pointForMoveA;
-                    direction = Vector2.ClampMagnitude(offset, 20f);
-
-                    _forceToMove = Mathf.Abs(offset.x) + Mathf.Abs(offset.y);
-
-                    force = _forceToMove / _maxForceToMove;
-
-                    Acceleration(force, offset);
+                    direction = Vector2.ClampMagnitude(offset, 50f);
+                    Acceleration();
 
                     moveCircle.transform.position = (new Vector2(pointForMoveA.x + direction.x, pointForMoveA.y + direction.y));
                 }
             }
+            if (Input.GetTouch(i).phase == TouchPhase.Stationary)
+            {
+                if (Input.GetTouch(i).position.x < Screen.width / 2)
+                {
 
+                    pointForMoveB = Input.GetTouch(i).position;
+
+                    offset = pointForMoveB - pointForMoveA;
+                    direction = Vector2.ClampMagnitude(offset, 50f);
+                    Acceleration();
+
+                    moveCircle.transform.position = (new Vector2(pointForMoveA.x + direction.x, pointForMoveA.y + direction.y));
+                }
+
+            }
             if (Input.GetTouch(i).phase == TouchPhase.Ended)
             {
                 if (Input.GetTouch(i).position.x > Screen.width / 2)
                 {
-                    if (CameraSwitch.topView)
-                    {
-                        UIInstance.instance.SetOnOffJoyStickForAim(false);
-                    }
+                    UIInstance.instance.SetOnOffJoyStickForAim(false);
+                    anim.SetBool("Shoot_b", false);
+                    anim.SetInteger("WeaponType_int", 0);
+
+                    anim.SetFloat("Speed_f", 0);
 
 
                 }
                 else if (Input.GetTouch(i).position.x < Screen.width / 2)
                 {
                     UIInstance.instance.SetOnOffJoyStickForMove(false);
-                    Acceleration(0, Vector3.zero);
+                    anim.SetFloat("Speed_f", 0);
 
                 }
 
             }
 
         }
-
     }
 
     private Vector3 angles = Vector3.zero;
